@@ -2820,7 +2820,7 @@ class ExpressionsProcessor {
       if (expr is LiteralTerm) {
         if (family.isEmpty || moreFamilies) {
           // It's font-family now.
-          family.add(expr.toString());
+          family.add(expr.text);
           moreFamilies = false;
         } else if (isChecked) {
           messages.warning('Only font-family can be a list', _exprs.span);
