@@ -9,7 +9,7 @@ part of '../visitor.dart';
 /// Helper function to dump the CSS AST.
 String treeToDebugString(StyleSheet styleSheet, [bool useSpan = false]) {
   var to = TreeOutput();
-  _TreePrinter(to, useSpan)..visitTree(styleSheet);
+  _TreePrinter(to, useSpan).visitTree(styleSheet);
   return to.toString();
 }
 
@@ -24,7 +24,7 @@ class _TreePrinter extends Visitor {
   @override
   void visitTree(StyleSheet tree) => visitStylesheet(tree);
 
-  void heading(String heading, node) {
+  void heading(String heading, TreeNode node) {
     if (useSpan) {
       output.heading(heading, node.span);
     } else {
@@ -310,7 +310,7 @@ class _TreePrinter extends Visitor {
     if (node.isIE7) output.write('IE7 property');
     output.write('property');
     super.visitDeclaration(node);
-    output.writeNode('expression', node._expression);
+    output.writeNode('expression', node.expression);
     if (node.important) {
       output.writeValue('!important', 'true');
     }
@@ -323,7 +323,7 @@ class _TreePrinter extends Visitor {
     output.depth++;
     output.write('defintion');
     super.visitVarDefinition(node);
-    output.writeNode('expression', node._expression);
+    output.writeNode('expression', node.expression);
     output.depth--;
   }
 
@@ -374,7 +374,7 @@ class _TreePrinter extends Visitor {
 
     super.visitNamespaceSelector(node);
 
-    visitSimpleSelector(node.nameAsSimpleSelector);
+    visitSimpleSelector(node.nameAsSimpleSelector!);
     output.depth--;
   }
 
@@ -392,7 +392,7 @@ class _TreePrinter extends Visitor {
     output.depth++;
     super.visitAttributeSelector(node);
     var tokenStr = node.matchOperatorAsTokenString();
-    output.writeValue('operator', '${node.matchOperator()} (${tokenStr})');
+    output.writeValue('operator', '${node.matchOperator()} ($tokenStr)');
     output.writeValue('value', node.valueToString());
     output.depth--;
   }

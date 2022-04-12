@@ -1,15 +1,16 @@
 name: csslib
-version: 0.16.2-dev
+version: 0.17.3-dev
 
-description: A library for parsing CSS.
-homepage: https://github.com/dart-lang/csslib
+description: A library for parsing and analyzing CSS (Cascading Style Sheets)
+repository: https://github.com/dart-lang/csslib
 
 environment:
-  sdk: '>=2.2.0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  source_span: ^1.4.0
+  source_span: ^1.8.0
 
 dev_dependencies:
-  pedantic: ^1.0.0
-  test: ^1.2.0
+  path: ^1.8.0
+  pedantic: ^1.10.0
+  test: ^1.16.0

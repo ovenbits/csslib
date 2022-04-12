@@ -12,7 +12,7 @@ enum MessageLevel { info, warning, severe }
 //              compilation state.
 
 /// The global [Messages] for tracking info/warnings/messages.
-Messages messages;
+late Messages messages;
 
 // Color constants used for generating messages.
 const _greenColor = '\u001b[32m';
@@ -38,7 +38,7 @@ const Map<MessageLevel, String> _errorLabel = {
 class Message {
   final MessageLevel level;
   final String message;
-  final SourceSpan span;
+  final SourceSpan? span;
   final bool useColors;
 
   Message(this.level, this.message, {this.span, this.useColors = false});
@@ -49,14 +49,16 @@ class Message {
     var colors = useColors && _errorColors.containsKey(level);
     var levelColor = colors ? _errorColors[level] : null;
     if (colors) output.write(levelColor);
-    output..write(_errorLabel[level])..write(' ');
+    output
+      ..write(_errorLabel[level])
+      ..write(' ');
     if (colors) output.write(_noColor);
 
     if (span == null) {
       output.write(message);
     } else {
       output.write('on ');
-      output.write(span.message(message, color: levelColor));
+      output.write(span!.message(message, color: levelColor));
     }
 
     return output.toString();
@@ -73,11 +75,11 @@ class Messages {
 
   final List<Message> messages = <Message>[];
 
-  Messages({PreprocessorOptions options, this.printHandler = print})
+  Messages({PreprocessorOptions? options, this.printHandler = print})
       : options = options ?? PreprocessorOptions();
 
   /// Report a compile-time CSS error.
-  void error(String message, SourceSpan span) {
+  void error(String message, SourceSpan? span) {
     var msg = Message(MessageLevel.severe, message,
         span: span, useColors: options.useColors);
 
@@ -87,7 +89,7 @@ class Messages {
   }
 
   /// Report a compile-time CSS warning.
-  void warning(String message, SourceSpan span) {
+  void warning(String message, SourceSpan? span) {
     if (options.warningsAsErrors) {
       error(message, span);
     } else {

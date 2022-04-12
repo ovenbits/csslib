@@ -1,5 +1,31 @@
+## 0.17.3-dev
+
+- Add commas between PercentageTerms in keyframe rules.
+
+## 0.17.2
+
+- Fixed a crash caused by `min()`, `max()` and `clamp()` functions that contain
+  mathematical expressions.
+
+## 0.17.1
+
+- Fix `Color.css` constructor when there are double values in the `rgba` string.
+
+## 0.17.0
+
+- Migrate to null safety.
+- `Font.merge` and `BoxEdge.merge` are now static methods instead of factory
+  constructors.
+- Add a type on the `identList` argument to `TokenKind.matchList`.
+- Remove workaround for https://github.com/dart-lang/sdk/issues/43136, which is
+  now fixed.
+
+## 0.16.2
+
+- Added support for escape codes in identifiers.
+
 ## 0.16.1
-	
+
 - Fixed a crash caused by parsing certain calc() expressions and variables names that contain numbers.
 
 ## 0.16.0
