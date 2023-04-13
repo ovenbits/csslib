@@ -36,10 +36,8 @@ class ParserState extends TokenizerState {
       : super(tokenizer);
 }
 
-// TODO(jmesserly): this should not be global
 void _createMessages({List<Message>? errors, PreprocessorOptions? options}) {
   errors ??= [];
-
   options ??= PreprocessorOptions(useColors: false, inputFile: 'memory');
 
   messages = Messages(options: options, printHandler: errors.add);
@@ -50,7 +48,7 @@ bool get isChecked => messages.options.checked;
 
 // TODO(terry): Remove nested name parameter.
 /// Parse and analyze the CSS file.
-StyleSheet compile(input,
+StyleSheet compile(Object input,
     {List<Message>? errors,
     PreprocessorOptions? options,
     bool nested = true,
@@ -83,10 +81,16 @@ void analyze(List<StyleSheet> styleSheets,
   Analyzer(styleSheets, messages).run();
 }
 
-/// Parse the [input] CSS stylesheet into a tree. The [input] can be a [String],
-/// or [List<int>] of bytes and returns a [StyleSheet] AST.  The optional
-/// [errors] list will contain each error/warning as a [Message].
-StyleSheet parse(input, {List<Message>? errors, PreprocessorOptions? options}) {
+/// Parse the [input] CSS stylesheet into a tree.
+///
+/// The [input] can be a [String], or [List<int>] of bytes and returns a
+/// [StyleSheet] AST. The optional [errors] list will collect any error
+/// encountered.
+StyleSheet parse(
+  Object input, {
+  List<Message>? errors,
+  PreprocessorOptions? options,
+}) {
   var source = _inputAsString(input);
 
   _createMessages(errors: errors, options: options);
@@ -99,7 +103,7 @@ StyleSheet parse(input, {List<Message>? errors, PreprocessorOptions? options}) {
 /// or [List<int>] of bytes and returns a [StyleSheet] AST.  The optional
 /// [errors] list will contain each error/warning as a [Message].
 // TODO(jmesserly): should rename "parseSelector" and return Selector
-StyleSheet selector(input, {List<Message>? errors}) {
+StyleSheet selector(Object input, {List<Message>? errors}) {
   var source = _inputAsString(input);
 
   _createMessages(errors: errors);
@@ -108,7 +112,7 @@ StyleSheet selector(input, {List<Message>? errors}) {
   return (_Parser(file, source)..tokenizer.inSelector = true).parseSelector();
 }
 
-SelectorGroup? parseSelectorGroup(input, {List<Message>? errors}) {
+SelectorGroup? parseSelectorGroup(Object input, {List<Message>? errors}) {
   var source = _inputAsString(input);
 
   _createMessages(errors: errors);
@@ -122,7 +126,7 @@ SelectorGroup? parseSelectorGroup(input, {List<Message>? errors}) {
       .processSelectorGroup();
 }
 
-String _inputAsString(input) {
+String _inputAsString(Object input) {
   String source;
 
   if (input is String) {
@@ -134,7 +138,7 @@ String _inputAsString(input) {
     // Here's some info about CSS encodings:
     // http://www.w3.org/International/questions/qa-css-charset.en.php
     //
-    // As JMesserly suggests it will probably need a "preparser" html5lib
+    // As JMesserly suggests it will probably need a "pre-parser" html5lib
     // (encoding_parser.dart) that interprets the bytes as ASCII and scans for
     // @charset. But for now an "encoding" argument would work.  Often the
     // HTTP header will indicate the correct encoding.
@@ -239,7 +243,7 @@ class _Parser {
   }
 
   /// Guard to break out of parser when an unexpected end of file is found.
-  // TODO(jimhug): Failure to call this method can lead to inifinite parser
+  // TODO(jimhug): Failure to call this method can lead to infinite parser
   //   loops.  Consider embracing exceptions for more errors to reduce
   //   the danger here.
   bool isPrematureEndOfFile() {
@@ -320,7 +324,7 @@ class _Parser {
     messages.warning(message, location);
   }
 
-  SourceSpan _makeSpan(FileSpan start) {
+  FileSpan _makeSpan(FileSpan start) {
     // TODO(terry): there are places where we are creating spans before we eat
     // the tokens, so using _previousToken is not always valid.
     // TODO(nweiz): use < rather than compareTo when SourceSpan supports it.
@@ -792,7 +796,7 @@ class _Parser {
         return decl is Declaration && decl is! IncludeMixinAtDeclaration;
       })) {
         var newDecls = <Declaration>[];
-        productions.forEach((include) {
+        for (var include in productions) {
           // If declGroup has items that are declarations then we assume
           // this mixin is a declaration mixin not a top-level mixin.
           if (include is IncludeDirective) {
@@ -801,7 +805,7 @@ class _Parser {
             _warning('Error mixing of top-level vs declarations mixins',
                 _makeSpan(include.span as FileSpan));
           }
-        });
+        }
         declGroup.declarations.insertAll(0, newDecls);
         productions = [];
       } else {
@@ -812,7 +816,6 @@ class _Parser {
           productions
               .add(decl is IncludeMixinAtDeclaration ? decl.include : decl);
         }
-        ;
         declGroup.declarations.clear();
       }
 
@@ -930,7 +933,7 @@ class _Parser {
       dynamic expr;
       var keepGoing = true;
       while (keepGoing && (expr = processTerm()) != null) {
-        // VarUsage is returns as a list
+        // VarUsage is returned as a list
         terms.add((expr is List ? expr[0] : expr) as Expression);
         keepGoing = !_peekKind(TokenKind.RPAREN);
         if (keepGoing) {
@@ -978,7 +981,7 @@ class _Parser {
 
         _eat(TokenKind.RPAREN);
 
-        var arguments = Expressions(_makeSpan(argumentSpan as FileSpan))
+        var arguments = Expressions(_makeSpan(argumentSpan))
           ..add(LiteralTerm(argument, argument, argumentSpan));
         function = FunctionTerm(ident.name, ident.name, arguments,
             _makeSpan(ident.span as FileSpan));
@@ -1127,8 +1130,7 @@ class _Parser {
   ///       color: red;
   ///     }
   ///
-  /// Return [:null:] if no selector or [SelectorGroup] if a selector was
-  /// parsed.
+  /// Return `null` if no selector or [SelectorGroup] if a selector was parsed.
   SelectorGroup? _nestedSelector() {
     var oldMessages = messages;
     _createMessages();
@@ -1583,7 +1585,7 @@ class _Parser {
         // bad.
         if (expr is SelectorExpression) {
           _eat(TokenKind.RPAREN);
-          return (pseudoElement)
+          return pseudoElement
               ? PseudoElementFunctionSelector(pseudoName, expr, span)
               : PseudoClassFunctionSelector(pseudoName, expr, span);
         } else {
@@ -1667,21 +1669,21 @@ class _Parser {
 
   // Attribute grammar:
   //
-  //     attributes :
-  //       '[' S* IDENT S* [ ATTRIB_MATCHES S* [ IDENT | STRING ] S* ]? ']'
+  // attributes :
+  //   '[' S* IDENT S* [ ATTRIB_MATCHES S* [ IDENT | STRING ] S* ]? ']'
   //
-  //     ATTRIB_MATCHES :
-  //       [ '=' | INCLUDES | DASHMATCH | PREFIXMATCH | SUFFIXMATCH | SUBSTRMATCH ]
+  // ATTRIB_MATCHES :
+  //   [ '=' | INCLUDES | DASHMATCH | PREFIXMATCH | SUFFIXMATCH | SUBSTRMATCH ]
   //
-  //     INCLUDES:         '~='
+  // INCLUDES:         '~='
   //
-  //     DASHMATCH:        '|='
+  // DASHMATCH:        '|='
   //
-  //     PREFIXMATCH:      '^='
+  // PREFIXMATCH:      '^='
   //
-  //     SUFFIXMATCH:      '$='
+  // SUFFIXMATCH:      '$='
   //
-  //     SUBSTRMATCH:      '*='
+  // SUBSTRMATCH:      '*='
   AttributeSelector? processAttribute() {
     var start = _peekToken.span;
 
@@ -1946,7 +1948,7 @@ class _Parser {
         //   100 - 900
         //   inherit
 
-        // TODO(terry): Only 'normal', 'bold', or values of 100-900 supoorted
+        // TODO(terry): Only 'normal', 'bold', or values of 100-900 supported
         //              need to handle bolder, lighter, and inherit.  See
         //              https://github.com/dart-lang/csslib/issues/1
         var expr = exprs.expressions[0];
@@ -2199,6 +2201,7 @@ class _Parser {
     return expressions;
   }
 
+  // ignore: constant_identifier_names
   static const int MAX_UNICODE = 0x10FFFF;
 
   // Term grammar:
@@ -2399,18 +2402,18 @@ class _Parser {
   }
 
   /// Process all dimension units.
-  LiteralTerm processDimension(Token? t, Object value, SourceSpan span) {
+  LiteralTerm processDimension(Token? t, Object value, FileSpan span) {
     LiteralTerm term;
     var unitType = _peek();
 
     switch (unitType) {
       case TokenKind.UNIT_EM:
+        span = span.expand(_next().span);
         term = EmTerm(value, t!.text, span);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_EX:
+        span = span.expand(_next().span);
         term = ExTerm(value, t!.text, span);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_LENGTH_PX:
       case TokenKind.UNIT_LENGTH_CM:
@@ -2418,54 +2421,59 @@ class _Parser {
       case TokenKind.UNIT_LENGTH_IN:
       case TokenKind.UNIT_LENGTH_PT:
       case TokenKind.UNIT_LENGTH_PC:
+        span = span.expand(_next().span);
         term = LengthTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_ANGLE_DEG:
       case TokenKind.UNIT_ANGLE_RAD:
       case TokenKind.UNIT_ANGLE_GRAD:
       case TokenKind.UNIT_ANGLE_TURN:
+        span = span.expand(_next().span);
         term = AngleTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_TIME_MS:
       case TokenKind.UNIT_TIME_S:
+        span = span.expand(_next().span);
         term = TimeTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_FREQ_HZ:
       case TokenKind.UNIT_FREQ_KHZ:
+        span = span.expand(_next().span);
         term = FreqTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
         break;
       case TokenKind.PERCENT:
+        span = span.expand(_next().span);
         term = PercentageTerm(value, t!.text, span);
-        _next(); // Skip the %
         break;
       case TokenKind.UNIT_FRACTION:
+        span = span.expand(_next().span);
         term = FractionTerm(value, t!.text, span);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_RESOLUTION_DPI:
       case TokenKind.UNIT_RESOLUTION_DPCM:
       case TokenKind.UNIT_RESOLUTION_DPPX:
+        span = span.expand(_next().span);
         term = ResolutionTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_CH:
+        span = span.expand(_next().span);
         term = ChTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_REM:
+        span = span.expand(_next().span);
         term = RemTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
         break;
       case TokenKind.UNIT_VIEWPORT_VW:
       case TokenKind.UNIT_VIEWPORT_VH:
       case TokenKind.UNIT_VIEWPORT_VMIN:
       case TokenKind.UNIT_VIEWPORT_VMAX:
+        span = span.expand(_next().span);
         term = ViewportTerm(value, t!.text, span, unitType);
-        _next(); // Skip the unit
+        break;
+      case TokenKind.UNIT_LH:
+      case TokenKind.UNIT_RLH:
+        span = span.expand(_next().span);
+        term = LineHeightTerm(value, t!.text, span, unitType);
         break;
       default:
         if (value is Identifier) {
@@ -2738,7 +2746,7 @@ class _Parser {
         hexText[2] == hexText[3]) {
       hexText = '${hexText[0]}${hexText[2]}';
     } else if (hexText.length == 2 && hexText[0] == hexText[1]) {
-      hexText = '${hexText[0]}';
+      hexText = hexText[0];
     }
     return HexColorTerm(hexValue, hexText, span);
   }
@@ -2831,10 +2839,10 @@ class ExpressionsProcessor {
       // Order is font-size font-family
       fontSize ??= processFontSize();
       fontFamily ??= processFontFamily();
-      //TODO(terry): Handle font-weight, font-style, and font-variant. See
-      //               https://github.com/dart-lang/csslib/issues/3
-      //               https://github.com/dart-lang/csslib/issues/4
-      //               https://github.com/dart-lang/csslib/issues/5
+      // TODO(terry): Handle font-weight, font-style, and font-variant. See
+      //              https://github.com/dart-lang/csslib/issues/3
+      //              https://github.com/dart-lang/csslib/issues/4
+      //              https://github.com/dart-lang/csslib/issues/5
     }
 
     return FontExpression(_exprs.span,

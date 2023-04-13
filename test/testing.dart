@@ -45,9 +45,9 @@ StyleSheet compileCss(String cssInput,
         polyfill: polyfill,
         includes: includes);
 
-StyleSheet polyFillCompileCss(input,
+StyleSheet polyFillCompileCss(String input,
         {List<Message>? errors, PreprocessorOptions? opts}) =>
-    compileCss(input as String, errors: errors, polyfill: true, opts: opts);
+    compileCss(input, errors: errors, polyfill: true, opts: opts);
 
 /// CSS emitter walks the style sheet tree and emits readable CSS.
 final _emitCss = CssPrinter();
@@ -57,13 +57,13 @@ final _cssVisitor = Visitor();
 
 /// Pretty printer for CSS.
 String prettyPrint(StyleSheet ss) {
-  // Walk the tree testing basic Vistor class.
+  // Walk the tree testing basic Visitor class.
   walkTree(ss);
   return (_emitCss..visitTree(ss, pretty: true)).toString();
 }
 
 /// Helper function to emit compact (non-pretty printed) CSS for suite test
-/// comparsions.  Spaces, new lines, etc. are reduced for easier comparsions of
+/// comparisons. Spaces, new lines, etc. are reduced for easier comparisons of
 /// expected suite test results.
 String compactOutput(StyleSheet ss) {
   walkTree(ss);
