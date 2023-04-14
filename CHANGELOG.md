@@ -1,11 +1,17 @@
 ## 0.17.3-dev
 
-- Add commas between PercentageTerms in keyframe rules.
+- Add markdown badges to the readme.
+- Adopted `package:dart_flutter_team_lints` linting rules.
+- Fixed the reported span for `Expression` nodes.
+- Fixed a regression parsing declaration values containing spaces.
+- Add support for `lh` and `rlh` units.
+- Refactor the package example.
 
 ## 0.17.2
 
 - Fixed a crash caused by `min()`, `max()` and `clamp()` functions that contain
   mathematical expressions.
+- Add commas between PercentageTerms in keyframe rules.
 
 ## 0.17.1
 
