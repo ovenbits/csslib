@@ -1,11 +1,22 @@
-## 0.17.3-dev
+## 1.0.1-wip
+
+- Require Dart 3.0
+
+## 1.0.0
+
+- Rev to `1.0.0` (note however that there are no API changes from `0.17.x`).
+
+## 0.17.3
 
 - Add markdown badges to the readme.
 - Adopted `package:dart_flutter_team_lints` linting rules.
+- Addressed an issue parsing font names not surrounded by quotes.
 - Fixed the reported span for `Expression` nodes.
 - Fixed a regression parsing declaration values containing spaces.
 - Add support for `lh` and `rlh` units.
 - Refactor the package example.
+- Addressed an issue with the indent level of the `CssPrinter` output.
+- Require Dart 2.19.
 
 ## 0.17.2
 
@@ -186,7 +197,7 @@
 
 ## 0.12.0+1
 
-* Allow the lastest version of `logging` package.
+* Allow the latest version of `logging` package.
 
 ## 0.12.0
 

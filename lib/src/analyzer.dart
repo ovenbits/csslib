@@ -456,8 +456,7 @@ class TopLevelIncludes extends Visitor {
     if (map.containsKey(node.name)) {
       var mixinDef = map[node.name];
       if (mixinDef is MixinRulesetDirective) {
-        _TopLevelIncludeReplacer.replace(
-            _messages, _styleSheet!, node, mixinDef.rulesets);
+        _TopLevelIncludeReplacer.replace(_styleSheet!, node, mixinDef.rulesets);
       } else if (currDef is MixinRulesetDirective && _anyRulesets(currDef)) {
         final mixinRuleset = currDef;
         var index = mixinRuleset.rulesets.indexOf(node);
@@ -508,16 +507,13 @@ class TopLevelIncludes extends Visitor {
 class _TopLevelIncludeReplacer extends Visitor {
   final IncludeDirective _include;
   final List<TreeNode> _newRules;
-  bool _foundAndReplaced = false;
 
   /// Look for the [ruleSet] inside of an @media directive; if found then
   /// replace with the [newRules].  If [ruleSet] is found and replaced return
   /// true.
-  static bool replace(Messages messages, StyleSheet styleSheet,
-      IncludeDirective include, List<TreeNode> newRules) {
-    var visitor = _TopLevelIncludeReplacer(include, newRules);
-    visitor.visitStyleSheet(styleSheet);
-    return visitor._foundAndReplaced;
+  static void replace(StyleSheet styleSheet, IncludeDirective include,
+      List<TreeNode> newRules) {
+    _TopLevelIncludeReplacer(include, newRules).visitStyleSheet(styleSheet);
   }
 
   _TopLevelIncludeReplacer(this._include, this._newRules);
@@ -528,7 +524,6 @@ class _TopLevelIncludeReplacer extends Visitor {
     if (index != -1) {
       node.topLevels.insertAll(index + 1, _newRules);
       node.topLevels.replaceRange(index, index + 1, [NoOp()]);
-      _foundAndReplaced = true;
     }
     super.visitStyleSheet(node);
   }
@@ -540,7 +535,6 @@ class _TopLevelIncludeReplacer extends Visitor {
       node.rulesets.insertAll(index + 1, _newRules);
       // Only the resolve the @include once.
       node.rulesets.replaceRange(index, index + 1, [NoOp()]);
-      _foundAndReplaced = true;
     }
     super.visitMixinRulesetDirective(node);
   }
@@ -584,8 +578,8 @@ class CallMixin extends Visitor {
     }
   }
 
-  /// Given a mixin's defined arguments return a cloned mixin defintion that has
-  /// replaced all defined arguments with user's supplied VarUsages.
+  /// Given a mixin's defined arguments return a cloned mixin definition that
+  /// has replaced all defined arguments with user's supplied VarUsages.
   MixinDefinition transform(List<List<Expression>> callArgs) {
     // TODO(terry): Handle default arguments and varArgs.
     // Transform mixin with callArgs.

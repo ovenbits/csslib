@@ -4,6 +4,9 @@
 
 part of '../parser.dart';
 
+// TODO: We should update the tokenization to follow what's described in the
+// spec: https://www.w3.org/TR/css-syntax-3/#tokenization.
+
 class Tokenizer extends TokenizerBase {
   /// U+ prefix for unicode characters.
   // ignore: non_constant_identifier_names
@@ -72,7 +75,7 @@ class Tokenizer extends TokenizerBase {
           // looks like a number dot followed by digit(s).
           var number = finishNumber();
           if (number.kind == TokenKind.INTEGER) {
-            // It's a number but it's preceeded by a dot, so make it a double.
+            // It's a number but it's preceded by a dot, so make it a double.
             _startIndex = start;
             return _finishToken(TokenKind.DOUBLE);
           } else {
@@ -231,24 +234,20 @@ class Tokenizer extends TokenizerBase {
     }
   }
 
-  bool varDef(int ch) {
-    return ch == 'v'.codeUnitAt(0) &&
-        _maybeEatChar('a'.codeUnitAt(0)) &&
-        _maybeEatChar('r'.codeUnitAt(0)) &&
-        _maybeEatChar('-'.codeUnitAt(0));
-  }
+  bool varDef(int ch) =>
+      ch == 'v'.codeUnitAt(0) &&
+      _maybeEatChar('a'.codeUnitAt(0)) &&
+      _maybeEatChar('r'.codeUnitAt(0)) &&
+      _maybeEatChar('-'.codeUnitAt(0));
 
-  bool varUsage(int ch) {
-    return ch == 'v'.codeUnitAt(0) &&
-        _maybeEatChar('a'.codeUnitAt(0)) &&
-        _maybeEatChar('r'.codeUnitAt(0)) &&
-        (_peekChar() == '-'.codeUnitAt(0));
-  }
+  bool varUsage(int ch) =>
+      ch == 'v'.codeUnitAt(0) &&
+      _maybeEatChar('a'.codeUnitAt(0)) &&
+      _maybeEatChar('r'.codeUnitAt(0)) &&
+      (_peekChar() == '-'.codeUnitAt(0));
 
   @override
-  Token _errorToken([String? message]) {
-    return _finishToken(TokenKind.ERROR);
-  }
+  Token _errorToken([String? message]) => _finishToken(TokenKind.ERROR);
 
   @override
   int getIdentifierKind() {
@@ -441,39 +440,32 @@ class Tokenizer extends TokenizerBase {
 
 /// Static helper methods.
 class TokenizerHelpers {
-  static bool isIdentifierStart(int c) {
-    return isIdentifierStartExpr(c) || c == 45 /*-*/;
-  }
+  static bool isIdentifierStart(int c) =>
+      isIdentifierStartExpr(c) || c == 45 /*-*/;
 
-  static bool isDigit(int c) {
-    return c >= 48 /*0*/ && c <= 57 /*9*/;
-  }
+  static bool isDigit(int c) => c >= 48 /*0*/ && c <= 57 /*9*/;
 
-  static bool isHexDigit(int c) {
-    return isDigit(c) ||
-        (c >= 97 /*a*/ && c <= 102 /*f*/) ||
-        (c >= 65 /*A*/ && c <= 70 /*F*/);
-  }
+  static bool isHexDigit(int c) =>
+      isDigit(c) ||
+      (c >= 97 /*a*/ && c <= 102 /*f*/) ||
+      (c >= 65 /*A*/ && c <= 70 /*F*/);
 
-  static bool isIdentifierPart(int c) {
-    return isIdentifierPartExpr(c) || c == 45 /*-*/;
-  }
+  static bool isIdentifierPart(int c) =>
+      isIdentifierPartExpr(c) || c == 45 /*-*/;
 
   /// Pseudo function expressions identifiers can't have a minus sign.
-  static bool isIdentifierStartExpr(int c) {
-    return (c >= 97 /*a*/ && c <= 122 /*z*/) ||
-        (c >= 65 /*A*/ && c <= 90 /*Z*/) ||
-        // Note: Unicode 10646 chars U+00A0 or higher are allowed, see:
-        // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
-        // http://www.w3.org/TR/CSS21/syndata.html#characters
-        // Also, escaped character should be allowed.
-        c == 95 /*_*/ ||
-        c >= 0xA0 ||
-        c == 92 /*\*/;
-  }
+  static bool isIdentifierStartExpr(int c) =>
+      (c >= 97 /*a*/ && c <= 122 /*z*/) ||
+      (c >= 65 /*A*/ && c <= 90 /*Z*/) ||
+      // Note: Unicode 10646 chars U+00A0 or higher are allowed, see:
+      // http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
+      // http://www.w3.org/TR/CSS21/syndata.html#characters
+      // Also, escaped character should be allowed.
+      c == 95 /*_*/ ||
+      c >= 0xA0 ||
+      c == 92 /*\*/;
 
   /// Pseudo function expressions identifiers can't have a minus sign.
-  static bool isIdentifierPartExpr(int c) {
-    return isIdentifierStartExpr(c) || isDigit(c);
-  }
+  static bool isIdentifierPartExpr(int c) =>
+      isIdentifierStartExpr(c) || isDigit(c);
 }
