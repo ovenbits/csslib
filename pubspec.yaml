@@ -16,4 +16,4 @@ dev_dependencies:
   dart_flutter_team_lints: ^2.0.0
   path: ^1.8.0
   term_glyph: ^1.2.0
-  test: ^1.16.0
+  test: ^1.25.2
